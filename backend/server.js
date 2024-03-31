@@ -4,19 +4,15 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// data base name
-// Make sure to replace <password> with the actual password and myFortniteApp with your database name.
+const PORT = process.env.PORT;
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
 mongoose
-  .connect(MONGODB_URI, { useUnifiedTopology: true })
+  .connect(MONGODB_URI)
   .then(() => console.log("MongoDB connection successful"))
   .catch((error) => console.error("MongoDB connection error:", error));
 
-// Define a Mongoose schema and model for Fortnite info
 const fortniteInfoSchema = new mongoose.Schema(
   {
     email: { type: String, required: true },
@@ -37,7 +33,6 @@ app.get("/", (req, res) => {
   res.send("Hello from the Node.js server!");
 });
 
-// POST route to submit Fortnite info
 app.post("/submit-fortnite-info", (req, res) => {
   const { email, skin } = req.body;
 

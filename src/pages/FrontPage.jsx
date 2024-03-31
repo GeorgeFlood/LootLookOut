@@ -18,8 +18,8 @@ const FrontPage = ({ onSubmitFortniteInfo }) => {
       className="flex flex-col justify-center items-center min-h-screen mx-auto"
       style={gradientStyle}
     >
-      <div>
-        <h1 className="font-heading w-max text-5xl text-gray-100">
+      <div className="w-7/12">
+        <h1 className="font-heading w-2 text-7xl text-gray-100 text-left mr-auto">
           Loot Look Out!
         </h1>
       </div>

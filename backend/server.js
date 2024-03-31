@@ -16,7 +16,7 @@ let transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: "mrgeorgeflood@gmail.com",
-    pass: EMAIL_PASS,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -54,57 +54,88 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-let fetch;
-
-cron.schedule("* * * * *", async () => {
-  if (!fetch) {
-    console.error("Fetch is not initialized. Trying to import.");
-    import("node-fetch")
-      .then(({ default: importedFetch }) => {
-        fetch = importedFetch;
-      })
-      .catch((error) => {
-        console.error("Failed to import fetch:", error);
-        return;
-      });
-  }
-
-  const shopUrl = "https://fortniteapi.io/v2/shop?lang=en";
+// Fortnite Shop Check Scheduled Task
+cron.schedule("0 7 * * *", async () => {
+  console.log("Cron job started");
+  const shopUrl = "https://fortniteapi.io/v2/shop?lang=en"; // Adjust language if needed
 
   try {
     const shopResponse = await fetch(shopUrl, {
       headers: { Authorization: FORTNITE_API_KEY },
     });
-    const shopData = await shopResponse.json();
 
-    const shopItems = shopData.items || [];
+    if (!shopResponse.ok) {
+      throw new Error(`HTTP error! Status: ${shopResponse.status}`);
+    }
+
+    const shopData = await shopResponse.json();
+    console.log("Shop data retrieved");
+
+    // Detailed logging for debugging (comment out later)
+    console.log("API Response (full):", shopData);
+
+    // Check for successful response
+    if (!shopData.result || !shopData.fullShop) {
+      // Updated checks based on API docs
+      console.error(
+        "Unexpected shopData format or error in response:",
+        JSON.stringify(shopData, null, 2)
+      );
+      // Consider retry logic or handling errors here
+      return;
+    }
+
+    // Access shop items from the updated structure
+    const shopItems = shopData.shop;
+
+    // Filtered relevant data (if needed)
+    const relevantItems = shopItems.map((item) => ({
+      name: item.displayName?.toLowerCase(), // Use displayName for item name
+      // Include other properties if needed based on API data
+    }));
 
     const users = await FortniteInfo.find({});
+    console.log(`Number of users to check: ${users.length}`);
 
-    for (let user of users) {
-      const isItemAvailable = shopItems.some(
-        (item) => item.displayName === user.skin
+    users.forEach(async (user) => {
+      console.log(`Checking items for user: ${user.email}`);
+
+      // Find if any item matches the user's skin preference
+      const skinAvailable = relevantItems.find(
+        (item) => item.name === user.skin.toLowerCase()
       );
 
-      if (isItemAvailable) {
-        console.log(`Notify ${user.email} about ${user.skin}`);
-        let mailOptions = {
-          from: "mrgeorgeflood@gmail.com",
-          to: user.email,
-          subject: "Item Available in Fortnite Shop!",
-          text: `Hello, the item ${user.skin} is now available in the Fortnite shop!`,
+      if (skinAvailable) {
+        console.log(`Item found for user: ${user.email}`);
+
+        const formatSkinName = (skinName) => {
+          return skinName
+            .split(" ") // Split the string into an array of words
+            .map(
+              (word) =>
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            ) // Capitalize the first character of each word
+            .join(" "); // Join the words back into a single string
         };
 
-        transporter.sendMail(mailOptions, function (error, info) {
+        let mailOptions = {
+          from: "mrgeorgeflood@gmail.com", // Replace with your actual email
+          to: user.email,
+          subject: `Your Fortnite Item is now available!`,
+          text: `Hello, your requested item "${formatSkinName(user.skin)}" is now available in the Fortnite shop!\n\n Many thanks for using Loot Look Out!`,
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
           if (error) {
-            console.log(error);
-          } else {
-            console.log("Email sent: " + info.response);
+            return console.log(`Error sending email: ${error}`);
           }
+          console.log("Message sent: %s", info.messageId);
         });
+      } else {
+        console.log(`Item not found for user: ${user.email}`);
       }
-    }
+    });
   } catch (error) {
-    console.error("Error checking Fortnite shop:", error);
+    console.error("Error in Fortnite shop check cron job:", error);
   }
 });

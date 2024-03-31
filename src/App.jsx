@@ -5,16 +5,8 @@ function App() {
   const [email, setEmail] = useState("");
   const [skin, setSkin] = useState("");
 
-  function capitalizeFirstLetters(str) {
-    return str
-      .toLowerCase()
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  }
-
   async function onSubmitFortniteInfo(email, skin) {
-    const formattedSkin = capitalizeFirstLetters(skin);
+    const formattedSkin = skin.toLowerCase().trim();
 
     const response = await fetch("http://localhost:5000/submit-fortnite-info", {
       method: "POST",

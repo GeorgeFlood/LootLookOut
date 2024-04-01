@@ -57,7 +57,7 @@ app.listen(PORT, () => {
 // Fortnite Shop Check Scheduled Task
 cron.schedule("0 7 * * *", async () => {
   console.log("Cron job started");
-  const shopUrl = "https://fortniteapi.io/v2/shop?lang=en"; // Adjust language if needed
+  const shopUrl = "https://fortniteapi.io/v2/shop?lang=en";
 
   try {
     const shopResponse = await fetch(shopUrl, {

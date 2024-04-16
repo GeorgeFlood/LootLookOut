@@ -3,13 +3,17 @@ import SubmitPage from "./pages/SubmitPage";
 import { useState } from "react";
 
 function App() {
+  // State hooks for managing email, skin, and submission status
   const [email, setEmail] = useState("");
   const [skin, setSkin] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(true);
 
+  // Async function to handle form submission and interact with backend
   async function onSubmitFortniteInfo(submittedEmail, skin) {
+    // Formatting the skin string
     const formattedSkin = skin.toLowerCase().trim();
 
+    // Sending POST request to backend with user's email and formatted skin
     const response = await fetch("http://localhost:5000/submit-fortnite-info", {
       method: "POST",
       headers: {
@@ -18,11 +22,12 @@ function App() {
       body: JSON.stringify({ email: submittedEmail, skin: formattedSkin }),
     });
 
+    // Checking response status to update the state accordingly
     if (response.ok) {
       console.log("Data sent to the backend successfully");
-      setEmail(submittedEmail); // Set the email state here after successful submission
+      setEmail(submittedEmail);
       setSkin(skin);
-      setIsSubmitted(true); // Update the submitted state here to ensure order
+      setIsSubmitted(true);
     } else {
       console.error(
         "Failed to send data. Status:",
@@ -33,8 +38,10 @@ function App() {
     }
   }
 
+  // Debugging log for the current email state
   console.log(email);
 
+  // Conditional rendering based on the isSubmitted state
   return (
     <div>
       {!isSubmitted ? (
@@ -49,4 +56,5 @@ function App() {
   );
 }
 
+// Exporting App component for use in other parts of the app
 export default App;

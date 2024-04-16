@@ -1,29 +1,37 @@
 import { useState } from "react";
 
 const FrontPage = ({ onSubmitFortniteInfo }) => {
+  // Initializing state for email and skin input values
   const [localEmail, setLocalEmail] = useState("");
   const [localSkin, setLocalSkin] = useState("");
 
+  // Function to handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmitFortniteInfo(localEmail, localSkin);
   };
 
+  // Style object for the background gradient
   const gradientStyle = {
     background: "linear-gradient(to right, #ff758c 0%, #ff7eb3 100%)",
   };
 
+  // JSX for the FrontPage component
   return (
     <div
       className="flex flex-col justify-center items-center min-h-screen mx-auto"
       style={gradientStyle}
     >
+      {/* Heading section with styled text */}
       <div className="w-7/12">
         <h1 className="font-heading w-2 text-7xl text-gray-100 text-left mr-auto">
-          Loot Look Out!
+          <span className="text-teal-600">Loot</span> <span>Look</span>{" "}
+          <span className="text-cyan-600">Out!</span>
         </h1>
       </div>
+      {/* Form for email and skin submission */}
       <form className="w-3/5" onSubmit={handleSubmit}>
+        {/* Email input field with inline SVG icon */}
         <div className="relative my-6">
           <div className="absolute inset-y-0 start-0 flex items-center pl-3.5 pointer-events-none">
             <svg
@@ -46,6 +54,7 @@ const FrontPage = ({ onSubmitFortniteInfo }) => {
             onChange={(e) => setLocalEmail(e.target.value)}
           />
         </div>
+        {/* Skin input field */}
         <div>
           <input
             type="text"
@@ -57,6 +66,7 @@ const FrontPage = ({ onSubmitFortniteInfo }) => {
             required
           />
         </div>
+        {/* Submit button */}
         <div>
           <button
             type="submit"
@@ -66,6 +76,7 @@ const FrontPage = ({ onSubmitFortniteInfo }) => {
           </button>
         </div>
       </form>
+      {/* Disclaimer or additional information text */}
       <div>
         <p className="w-3/4 font-sans text-center m-auto mt-4 text-black">
           *Enter your email and desired Fortnite skin to receive a notification
